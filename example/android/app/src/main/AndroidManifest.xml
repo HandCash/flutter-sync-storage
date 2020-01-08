@@ -8,7 +8,9 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="flutter_sync_storage_example"
+        android:backupAgent="io.handcash.flutter_sync_storage.SyncBackupHelper"
         android:icon="@mipmap/ic_launcher">
+        <meta-data android:name="com.google.android.backup.api_key" android:value="AEdPqrEAAAAIiallbQW3ff5hFcLv-d5Em6R-Jl2ExGj_39VApA" />
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -26,36 +27,28 @@ public class FlutterSyncStoragePlugin implements FlutterPlugin, MethodCallHandle
 
     private SharedPreferences sharedPreferences;
     private BackupManager backupManager;
+    private MethodChannel methodChannel;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        final MethodChannel channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(),
+        onAttachedToEngine(flutterPluginBinding.getApplicationContext(), flutterPluginBinding.getBinaryMessenger());
+    }
+
+    private void onAttachedToEngine(Context applicationContext, BinaryMessenger messenger) {
+        this.sharedPreferences = applicationContext.getSharedPreferences(SyncBackupHelper.PREFS, Context.MODE_PRIVATE);
+        this.backupManager = new BackupManager(applicationContext);
+
+        methodChannel = new MethodChannel(messenger,
                 "flutter_sync_storage");
-        channel.setMethodCallHandler(new FlutterSyncStoragePlugin(flutterPluginBinding.getApplicationContext()));
+        methodChannel.setMethodCallHandler(this);
     }
 
     // This static function is optional and equivalent to onAttachedToEngine. It
     // supports the old
-    // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
-    // plugin registration via this function while apps migrate to use the new
-    // Android APIs
-    // post-flutter-1.12 via https://flutter.dev/go/android-project-migration.
-    //
-    // It is encouraged to share logic between onAttachedToEngine and registerWith
-    // to keep
-    // them functionally equivalent. Only one of onAttachedToEngine or registerWith
-    // will be called
-    // depending on the user's project. onAttachedToEngine or registerWith must both
-    // be defined
-    // in the same class.
+    // pre-Flutter-1.12 Android projects.
     public static void registerWith(Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_sync_storage");
-        channel.setMethodCallHandler(new FlutterSyncStoragePlugin(registrar.context()));
-    }
-
-    public FlutterSyncStoragePlugin(Context context) {
-        sharedPreferences = context.getSharedPreferences(SyncBackupHelper.PREFS, Context.MODE_PRIVATE);
-        backupManager = new BackupManager(context);
+        final FlutterSyncStoragePlugin instance = new FlutterSyncStoragePlugin();
+        instance.onAttachedToEngine(registrar.context(),registrar.messenger());
     }
 
     @Override
@@ -91,5 +84,9 @@ public class FlutterSyncStoragePlugin implements FlutterPlugin, MethodCallHandle
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+        this.sharedPreferences = null;
+        this.backupManager = null;
+        this.methodChannel.setMethodCallHandler(null);
+        this.methodChannel = null;
     }
 }
