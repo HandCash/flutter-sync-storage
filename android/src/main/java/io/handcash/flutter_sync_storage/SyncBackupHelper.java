@@ -2,6 +2,7 @@ package io.handcash.flutter_sync_storage;
 
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.SharedPreferencesBackupHelper;
+import android.util.Log;
 
 class SyncBackupHelper extends BackupAgentHelper {
 
@@ -17,5 +18,12 @@ class SyncBackupHelper extends BackupAgentHelper {
         SharedPreferencesBackupHelper helper =
                 new SharedPreferencesBackupHelper(this, PREFS);
         addHelper(PREFS_BACKUP_KEY, helper);
+    }
+
+
+    @Override
+    public void onRestoreFinished() {
+        super.onRestoreFinished();
+        Log.d("FLUTTER_SYNC_STORAGE", "Restored shared preferences");
     }
 }
