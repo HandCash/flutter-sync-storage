@@ -4,7 +4,11 @@ import android.app.backup.BackupAgentHelper;
 import android.app.backup.SharedPreferencesBackupHelper;
 import android.util.Log;
 
-class SyncBackupHelper extends BackupAgentHelper {
+import io.flutter.embedding.engine.systemchannels.PlatformChannel;
+
+public class SyncBackupHelper extends BackupAgentHelper {
+
+    PlatformChannel _channel = 
 
     // The name of the SharedPreferences file
     static final String PREFS = "io.handcash.flutter_sync_storage.android_backup";
