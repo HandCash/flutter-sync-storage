@@ -10,10 +10,15 @@ class FlutterSyncStorage {
 
   Future<String> read(String key) async {
     String value = "";
-    if (Platform.isIOS) {
-      value = await FlutterSecureStorage().read(key: key);
-    } else {
-      value = await _channel.invokeMethod("read", key);
+    switch (Platform.operatingSystem) {
+      case "ios":
+        value = await FlutterSecureStorage().read(key: key);
+        break;
+
+      case "android":
+      default:
+        value = await _channel.invokeMethod("read", key);
+        break;
     }
 
     return value;
@@ -21,14 +26,20 @@ class FlutterSyncStorage {
 
   Future<bool> write(String key, String value) async {
     bool result = false;
-    if (Platform.isIOS) {
-      await FlutterSecureStorage().write(key: key, value: value);
-      result = true;
-    } else {
-      Map<String, String> args = Map<String, String>();
-      args.putIfAbsent("key", () => key);
-      args.putIfAbsent("value", () => value);
-      result = await _channel.invokeMethod("write", args);
+
+    switch (Platform.operatingSystem) {
+      case "ios":
+        await FlutterSecureStorage().write(key: key, value: value);
+        result = true;
+        break;
+
+      case "android":
+      default:
+        Map<String, String> args = Map<String, String>();
+        args.putIfAbsent("key", () => key);
+        args.putIfAbsent("value", () => value);
+        result = await _channel.invokeMethod("write", args);
+        break;
     }
 
     return result;
